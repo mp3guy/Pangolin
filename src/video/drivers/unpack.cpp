@@ -235,6 +235,31 @@ const json::value& UnpackVideo::FrameProperties() const
     return in_prop ? in_prop->FrameProperties() : frame_properties;
 }
 
+unsigned int UnpackVideo::AvailableFrames() const
+{
+    BufferAwareVideoInterface* vpi = dynamic_cast<BufferAwareVideoInterface*>(videoin[0]);
+    if(!vpi)
+    {
+        return 0;
+    }
+    else
+    {
+        return vpi->AvailableFrames();
+    }
+}
+
+bool UnpackVideo::DropNFrames(uint32_t n)
+{
+    BufferAwareVideoInterface* vpi = dynamic_cast<BufferAwareVideoInterface*>(videoin[0]);
+    if(!vpi)
+    {
+        return false;
+    }
+    else
+    {
+        return vpi->DropNFrames(n);
+    }
+}
 
 }
 

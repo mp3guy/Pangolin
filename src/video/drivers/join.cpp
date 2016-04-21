@@ -90,7 +90,7 @@ void VideoJoiner::Stop()
     }
 }
 
-bool VideoJoiner::Sync(int64_t tolerance_us, bool continuous)
+bool VideoJoiner::Sync(int64_t tolerance_us, bool continuous, int64_t expected_delta_us)
 {
     for(size_t s=0; s< src.size(); ++s)
     {
@@ -102,6 +102,7 @@ bool VideoJoiner::Sync(int64_t tolerance_us, bool continuous)
     sync_attempts_to_go = MAX_SYNC_ATTEMPTS;
     sync_tolerance_us = tolerance_us;
     sync_continuously = continuous;
+    this->expected_delta_us = expected_delta_us;
     return true;
 }
 
@@ -148,7 +149,7 @@ bool VideoJoiner::GrabNext( unsigned char* image, bool wait )
         }
     }
 
-    if((sync_continuously || (sync_attempts_to_go == 0)) && ((newest - oldest) > sync_tolerance_us) ){
+    if((sync_continuously || (sync_attempts_to_go == 0)) && ((newest - oldest) - expected_delta_us > sync_tolerance_us) ){
         pango_print_warn("Join error, unable to sync streams within %lu us\n", (unsigned long)sync_tolerance_us);
     }
 
@@ -172,7 +173,7 @@ bool VideoJoiner::GrabNext( unsigned char* image, bool wait )
         if(!sync_continuously) --sync_attempts_to_go;
     }
 
-    if((newest - oldest) > sync_tolerance_us ) {
+    if((newest - oldest) - expected_delta_us > sync_tolerance_us ) {
         TGRABANDPRINT("NOT IN SYNC (continuously=%d attempts_to_go=%d) %ld %ld syncing took ", sync_continuously, sync_attempts_to_go, newest, oldest);
         return !(sync_continuously || (sync_attempts_to_go == 0));
     } else {
@@ -281,7 +282,7 @@ bool VideoJoiner::GrabNewest( unsigned char* image, bool wait )
       }
       TGRABANDPRINT("Stream >=1 grab took ");
 
-      if((sync_continuously || (sync_attempts_to_go == 0)) && ((newest - oldest) > sync_tolerance_us) ){
+      if((sync_continuously || (sync_attempts_to_go == 0)) && ((newest - oldest) - expected_delta_us > sync_tolerance_us) ){
           pango_print_warn("Join error, unable to sync streams within %lu us\n", (unsigned long)sync_tolerance_us);
       }
 
@@ -304,7 +305,7 @@ bool VideoJoiner::GrabNewest( unsigned char* image, bool wait )
           }
           if(!sync_continuously) --sync_attempts_to_go;
       }
-      if((newest - oldest) > sync_tolerance_us ) {
+      if((newest - oldest) - expected_delta_us > sync_tolerance_us ) {
           TGRABANDPRINT("NOT IN SYNC (continuously=%d attempts_to_go=%d) %ld %ld syncing took ", sync_continuously, sync_attempts_to_go, newest, oldest);
           return !(sync_continuously || (sync_attempts_to_go == 0));
       } else {

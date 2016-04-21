@@ -49,7 +49,7 @@ public:
 
     void Stop();
 
-    bool Sync(int64_t tolerance_us, bool continuous);
+    bool Sync(int64_t tolerance_us, bool continuous, int64_t expected_delta_us = 0);
 
     bool GrabNext( unsigned char* image, bool wait = true );
 
@@ -64,6 +64,7 @@ protected:
     int sync_attempts_to_go;
     int64_t sync_tolerance_us;
     bool sync_continuously;
+    int64_t expected_delta_us;
     const static int MAX_SYNC_ATTEMPTS = 50;
 };
 
